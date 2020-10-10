@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -145,7 +146,7 @@ public class Connection {
 
     Connection that = (Connection) other;
 
-    return !(uniqueKey != null ? !uniqueKey.equals(that.uniqueKey) : that.uniqueKey != null);
+    return Objects.equals(uniqueKey, that.uniqueKey);
   }
 
   @Override
