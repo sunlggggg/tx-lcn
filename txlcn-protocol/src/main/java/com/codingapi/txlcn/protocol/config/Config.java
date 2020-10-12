@@ -35,7 +35,7 @@ public class Config {
     /**
      * 请求发送消息的等待时间(单位:毫秒)
      */
-    private int awaitTime = 1000;
+    private int awaitTime = 30000;
 
 
 }

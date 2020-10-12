@@ -19,6 +19,8 @@ import org.springframework.context.ApplicationContext;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import static com.codingapi.txlcn.protocol.handler.SessionUtil.getSessionAttribute;
+
 /**
  * @author lorne
  * @date 2020/3/4
@@ -30,7 +32,6 @@ public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message>
 
     private final Protocoler protocoler;
 
-    private static final String SESSION_ATTRIBUTE_KEY = "session";
 
     @Getter
     private final ApplicationContext applicationContext;
@@ -49,9 +50,7 @@ public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message>
         this.executors = Executors.newFixedThreadPool(config.getHandleThreads());
     }
 
-    static Attribute<Connection> getSessionAttribute(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(AttributeKey.<Connection>valueOf(SESSION_ATTRIBUTE_KEY));
-    }
+
 
 
     @Override
@@ -94,7 +93,6 @@ public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message>
             }
 
             if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
-//                log.debug("send heart message to {} ", ctx.channel().remoteAddress());
                 ctx.writeAndFlush(new Heartbeat());
             }
         }

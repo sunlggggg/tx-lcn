@@ -6,7 +6,9 @@ import com.codingapi.txlcn.protocol.config.Config;
 import com.codingapi.txlcn.protocol.exception.ProtocolException;
 import com.codingapi.txlcn.protocol.message.separate.*;
 import io.netty.channel.Channel;
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,15 @@ public class Connection {
     private final String uniqueKey;
 
     private final Config config;
+
+    @Getter
+    @Setter
+    private boolean isOk;
+
+    @Getter
+    @Setter
+    private String mpPassword;
+
 
     public Connection(Channel channel, Config config) {
         this.config = config;

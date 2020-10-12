@@ -23,6 +23,7 @@ public class DataRequestMessage extends AbsMessage {
         // 服务器端处理数据并返回
         DataResponseMessage responseMessage = new DataResponseMessage(messageId);
         responseMessage.setValue("456");
+        System.out.println("response...");
         connection.send(responseMessage);
     }
 

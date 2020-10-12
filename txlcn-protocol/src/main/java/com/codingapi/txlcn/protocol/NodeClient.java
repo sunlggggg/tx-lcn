@@ -5,20 +5,15 @@ import com.codingapi.txlcn.protocol.config.Config;
 import com.codingapi.txlcn.protocol.handler.ProtocolChannelHandler;
 import com.codingapi.txlcn.protocol.handler.ProtocolChannelInitializer;
 import com.codingapi.txlcn.protocol.message.Connection;
-import com.codingapi.txlcn.protocol.message.event.TransactionCommitEvent;
-import com.codingapi.txlcn.protocol.message.separate.TransactionMessage;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 
 /**

@@ -12,6 +12,8 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
 
+import java.nio.channels.Pipe;
+
 /**
  * @author lorne
  * @date 2020/3/4
@@ -36,8 +38,24 @@ public class ProtocolChannelInitializer extends ChannelInitializer<SocketChannel
     @Override
     protected void initChannel(final SocketChannel ch) throws Exception {
         final ChannelPipeline pipeline = ch.pipeline();
-        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+
+//        pipeline.addLast(new SecureChannelDecoder());
+//        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+//        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+//        pipeline.addLast(eventExecutorGroup, protocolChannelHandler);
+//
+//        pipeline.addLast(new ObjectEncoder());
+//        pipeline.addLast(new SecureChannelEncoder());
+//        pipeline.addLast(new LengthFieldPrepender(4, false));
+//        pipeline.addLast(new SecureChannelDecoder());
+//        pipeline.addLast(new SecureChannelEncoder());
+
+        pipeline.addLast(new SecureChannelEncoder());
+        pipeline.addLast(new SecureChannelDecoder());
+
         pipeline.addLast(new ObjectEncoder());
+        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+
         pipeline.addLast(new LengthFieldPrepender(4, false));
         pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
 //        pipeline.addLast(new IdleStateHandler(config.getMaxReadIdleSeconds(), config.getMaxWriteIdleSeconds(), 0));

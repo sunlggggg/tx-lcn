@@ -1,12 +1,8 @@
 package com.codingapi.txlcn.protocol;
 
-import com.codingapi.txlcn.protocol.await.Lock;
-import com.codingapi.txlcn.protocol.await.LockContext;
 import com.codingapi.txlcn.protocol.config.Config;
-import com.codingapi.txlcn.protocol.exception.ProtocolException;
 import com.codingapi.txlcn.protocol.message.Connection;
 import com.codingapi.txlcn.protocol.message.Message;
-import com.codingapi.txlcn.protocol.message.separate.TransactionMessage;
 import com.codingapi.txlcn.protocol.service.ConnectionService;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
