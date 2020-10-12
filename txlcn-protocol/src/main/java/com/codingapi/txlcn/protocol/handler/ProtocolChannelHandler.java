@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 @ChannelHandler.Sharable
-public class ProtocolChannelHandler  extends SimpleChannelInboundHandler<Message> {
+public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message> {
 
     private final Protocoler protocoler;
 
@@ -46,7 +46,7 @@ public class ProtocolChannelHandler  extends SimpleChannelInboundHandler<Message
         this.protocoler = protocoler;
         this.applicationContext = applicationContext;
         this.config = config;
-        this.executors =  Executors.newFixedThreadPool(config.getHandleThreads());
+        this.executors = Executors.newFixedThreadPool(config.getHandleThreads());
     }
 
     static Attribute<Connection> getSessionAttribute(ChannelHandlerContext ctx) {
@@ -57,7 +57,7 @@ public class ProtocolChannelHandler  extends SimpleChannelInboundHandler<Message
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         log.debug("Channel active {}", ctx.channel().remoteAddress());
-        final Connection connection = new Connection(ctx,config);
+        final Connection connection = new Connection(ctx.channel(), config);
         getSessionAttribute(ctx).set(connection);
         protocoler.handleConnectionOpened(connection);
     }
@@ -74,11 +74,11 @@ public class ProtocolChannelHandler  extends SimpleChannelInboundHandler<Message
     public void channelRead0(final ChannelHandlerContext ctx, final Message message) throws Exception {
         log.debug("Message {} received from {}", message.getClass(), ctx.channel().remoteAddress());
         final Connection connection = getSessionAttribute(ctx).get();
-        executors.execute(()->{
+        executors.execute(() -> {
             try {
-                message.handle(applicationContext,protocoler, connection);
+                message.handle(applicationContext, protocoler, connection);
             } catch (Exception e) {
-                log.error("message handle fail.",e);
+                log.error("message handle fail.", e);
             }
         });
     }
@@ -93,7 +93,7 @@ public class ProtocolChannelHandler  extends SimpleChannelInboundHandler<Message
                 ctx.close();
             }
 
-            if(idleStateEvent.state() == IdleState.WRITER_IDLE){
+            if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
 //                log.debug("send heart message to {} ", ctx.channel().remoteAddress());
                 ctx.writeAndFlush(new Heartbeat());
             }

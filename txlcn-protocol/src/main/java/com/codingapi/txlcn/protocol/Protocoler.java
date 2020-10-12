@@ -39,7 +39,7 @@ public class Protocoler {
     }
 
     public Protocoler(Config config) {
-        this.config =config;
+        this.config = config;
         this.connectionService = new ConnectionService();
     }
 
@@ -70,8 +70,8 @@ public class Protocoler {
             return;
         }
 
-        Collection<Connection> connections =  getConnections();
-        for(Connection connection:connections){
+        Collection<Connection> connections = getConnections();
+        for (Connection connection : connections) {
             connection.close();
         }
 
@@ -103,25 +103,6 @@ public class Protocoler {
             log.warn("This key {} not connected. ", uniqueKey);
         }
     }
-
-    public TransactionMessage requestMsg(String uniqueKey, TransactionMessage message) {
-        Connection connection = connectionService.getConnection(uniqueKey);
-        if (connection != null) {
-            String groupId = message.getGroupId();
-            Lock lock =  LockContext.getInstance().addKey(groupId);
-            try {
-                connection.send(message);
-                lock.await(config.getAwaitTime());
-                return (TransactionMessage)lock.getRes();
-            }finally {
-                lock.clear();
-            }
-        } else {
-            log.warn("This key {} not connected. ", uniqueKey);
-            throw new ProtocolException("can't send message . ");
-        }
-    }
-
 
     public boolean existConnect(String uniqueKey) {
         return connectionService.existConnect(uniqueKey);

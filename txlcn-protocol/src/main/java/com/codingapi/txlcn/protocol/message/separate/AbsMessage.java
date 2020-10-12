@@ -8,6 +8,8 @@ import com.codingapi.txlcn.protocol.message.Message;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 
+import java.util.UUID;
+
 /**
  * @author lorne
  * @date 2020/3/4
@@ -16,30 +18,17 @@ import org.springframework.context.ApplicationContext;
 @Data
 public abstract class AbsMessage implements Message {
 
-    /**
-     * 是否第一个 node 节点
-     */
-    protected Boolean isFirstNode = false;
-
-    /**
-     * 是否执行过业务逻辑
-     */
-    protected Boolean isBusinessExecuted = false;
-
-    /**
-     * 是否可以回调 TC
-     */
-    protected Boolean isReadyCallBack = false;
-
     protected String messageId;
 
-    protected String firstMessageId;
+    public AbsMessage() {
+        this.messageId = UUID.randomUUID().toString();
+    }
 
     @Override
     public void handle(ApplicationContext springContext,
                        Protocoler protocoler,
                        Connection connection) throws Exception {
-        //唤醒等待消息
+        // 唤醒等待消息
         if (messageId != null) {
             Lock lock = LockContext.getInstance().getKey(messageId);
             if (lock != null) {

@@ -20,7 +20,6 @@ public class TransactionCommitEvent extends TransactionMessage {
     private String result;
 
     public TransactionCommitEvent(String groupId, boolean commit) {
-        this.groupId = groupId;
         this.commit = commit;
     }
 }
