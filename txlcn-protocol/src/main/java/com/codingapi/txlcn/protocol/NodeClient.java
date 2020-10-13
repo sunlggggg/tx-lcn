@@ -4,6 +4,7 @@ package com.codingapi.txlcn.protocol;
 import com.codingapi.txlcn.protocol.config.Config;
 import com.codingapi.txlcn.protocol.handler.ProtocolChannelHandler;
 import com.codingapi.txlcn.protocol.handler.ProtocolChannelInitializer;
+import com.codingapi.txlcn.protocol.handler.SessionUtil;
 import com.codingapi.txlcn.protocol.message.Connection;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -14,6 +15,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -37,7 +40,8 @@ public class NodeClient {
 
     public static Connection getConnect(EndPoint endPoint) throws InterruptedException {
         ChannelFuture channelFuture = clientBootstrap.connect(endPoint.getIp(), endPoint.getPort()).sync();
-        return new Connection(channelFuture.channel(), new Config());
+        SessionUtil.setSessionAttribute(channelFuture.channel(), new Connection(channelFuture.channel(), new Config()));
+        return SessionUtil.getSessionAttribute(channelFuture.channel());
     }
 
 

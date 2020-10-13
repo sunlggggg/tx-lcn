@@ -1,6 +1,9 @@
 package com.codingapi.txlcn.protocol.handler;
 
 import com.codingapi.txlcn.protocol.config.Config;
+import com.codingapi.txlcn.protocol.handler.codec.JSONSerializer;
+import com.codingapi.txlcn.protocol.handler.codec.SecureChannelDecoder;
+import com.codingapi.txlcn.protocol.handler.codec.SecureChannelEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -11,8 +14,6 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
-
-import java.nio.channels.Pipe;
 
 /**
  * @author lorne
@@ -38,27 +39,14 @@ public class ProtocolChannelInitializer extends ChannelInitializer<SocketChannel
     @Override
     protected void initChannel(final SocketChannel ch) throws Exception {
         final ChannelPipeline pipeline = ch.pipeline();
-
-//        pipeline.addLast(new SecureChannelDecoder());
-//        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-//        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-//        pipeline.addLast(eventExecutorGroup, protocolChannelHandler);
-//
+        pipeline.addLast(new SecureChannelEncoder(new JSONSerializer()));
+        pipeline.addLast(new SecureChannelDecoder(new JSONSerializer()));
 //        pipeline.addLast(new ObjectEncoder());
-//        pipeline.addLast(new SecureChannelEncoder());
+//        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
 //        pipeline.addLast(new LengthFieldPrepender(4, false));
-//        pipeline.addLast(new SecureChannelDecoder());
-//        pipeline.addLast(new SecureChannelEncoder());
+//        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 1, 4, 0, 4));
 
-        pipeline.addLast(new SecureChannelEncoder());
-        pipeline.addLast(new SecureChannelDecoder());
-
-        pipeline.addLast(new ObjectEncoder());
-        pipeline.addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-
-        pipeline.addLast(new LengthFieldPrepender(4, false));
-        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
-//        pipeline.addLast(new IdleStateHandler(config.getMaxReadIdleSeconds(), config.getMaxWriteIdleSeconds(), 0));
+        pipeline.addLast(new IdleStateHandler(config.getMaxReadIdleSeconds(), config.getMaxWriteIdleSeconds(), 0));
         pipeline.addLast(eventExecutorGroup, protocolChannelHandler);
     }
 }

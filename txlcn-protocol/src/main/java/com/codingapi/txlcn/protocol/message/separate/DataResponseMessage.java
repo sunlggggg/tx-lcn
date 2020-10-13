@@ -1,6 +1,7 @@
 package com.codingapi.txlcn.protocol.message.separate;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ·
@@ -9,10 +10,11 @@ import lombok.Data;
  * @author sunligang
  */
 @Data
+@NoArgsConstructor
 public class DataResponseMessage extends AbsMessage {
-   public DataResponseMessage(String messageId){
-       this.messageId = messageId;
-   }
+    public DataResponseMessage(String messageId) {
+        this.messageId = messageId;
+    }
 
     private String value;
 }

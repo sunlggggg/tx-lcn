@@ -6,6 +6,8 @@ import com.codingapi.txlcn.protocol.config.Config;
 import com.codingapi.txlcn.protocol.exception.ProtocolException;
 import com.codingapi.txlcn.protocol.message.separate.*;
 import io.netty.channel.Channel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Objects;
+
+import static com.codingapi.txlcn.protocol.handler.SessionUtil.getSessionAttribute;
+import static com.codingapi.txlcn.protocol.handler.SessionUtil.setSessionAttribute;
 
 /**
  * Maintains a TCP connection between the local peer and a neighbour
@@ -41,7 +46,7 @@ public class Connection {
 
     @Getter
     @Setter
-    private boolean isOk;
+    private volatile boolean isOk;
 
     @Getter
     @Setter
@@ -57,6 +62,13 @@ public class Connection {
         this.uniqueKey = String.format("%s:%d", remoteHost, remotePort);
     }
 
+    public void send(final Message msg, GenericFutureListener<? extends Future<? super Void>> listener) {
+        if (channel != null) {
+            channel.writeAndFlush(msg, channel.newPromise().addListener(listener));
+        } else {
+            LOGGER.error("Can not send message " + msg.getClass() + " to " + toString());
+        }
+    }
 
     public void send(final Message msg) {
         if (channel != null) {
@@ -66,15 +78,32 @@ public class Connection {
         }
     }
 
+    public <T extends AbsMessage> T request(final AbsMessage msg, GenericFutureListener<? extends Future<? super Void>> listener) {
+        if (channel != null) {
+            Lock lock = LockContext.getInstance().addKey(msg.getMessageId());
+            try {
+                LOGGER.debug("send message {}", msg);
+                channel.writeAndFlush(msg, channel.newPromise().addListener(listener));
+                lock.await(config.getAwaitTime());
+                return (T) lock.getRes();
+            } finally {
+                lock.clear();
+            }
+        } else {
+            LOGGER.error("Can not send message " + msg.getClass() + " to " + toString());
+            throw new ProtocolException("can't send message . ");
+        }
+    }
 
-    public DataResponseMessage request(final DataRequestMessage msg) {
+
+    public <T extends AbsMessage> T request(final AbsMessage msg) {
         if (channel != null) {
             Lock lock = LockContext.getInstance().addKey(msg.getMessageId());
             try {
                 LOGGER.debug("send message {}", msg);
                 channel.writeAndFlush(msg);
                 lock.await(config.getAwaitTime());
-                return (DataResponseMessage) lock.getRes();
+                return (T) lock.getRes();
             } finally {
                 lock.clear();
             }
@@ -93,29 +122,29 @@ public class Connection {
     }
 
     @Override
-    public boolean equals(final Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-
-        Connection that = (Connection) other;
-
-        return Objects.equals(uniqueKey, that.uniqueKey);
-    }
-
-    @Override
-    public int hashCode() {
-        return uniqueKey != null ? uniqueKey.hashCode() : 0;
-    }
-
-    @Override
     public String toString() {
         return "Connection{" +
                 "remoteAddress=" + remoteAddress +
                 ", isOpen=" + (channel != null) +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Connection that = (Connection) o;
+        return remotePort == that.remotePort &&
+                remoteHost.equals(that.remoteHost) &&
+                uniqueKey.equals(that.uniqueKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(remoteHost, remotePort, uniqueKey);
     }
 }

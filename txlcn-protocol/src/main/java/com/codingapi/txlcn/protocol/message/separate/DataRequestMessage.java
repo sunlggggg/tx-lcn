@@ -22,8 +22,8 @@ public class DataRequestMessage extends AbsMessage {
     public void handle(ApplicationContext springContext, Protocoler protocoler, Connection connection) throws Exception {
         // 服务器端处理数据并返回
         DataResponseMessage responseMessage = new DataResponseMessage(messageId);
+        // todo set value
         responseMessage.setValue("456");
-        System.out.println("response...");
         connection.send(responseMessage);
     }
 

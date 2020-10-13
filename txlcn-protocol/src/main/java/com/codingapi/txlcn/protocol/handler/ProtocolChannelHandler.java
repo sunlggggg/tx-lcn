@@ -5,6 +5,7 @@ import com.codingapi.txlcn.protocol.config.Config;
 import com.codingapi.txlcn.protocol.message.Connection;
 import com.codingapi.txlcn.protocol.message.Heartbeat;
 import com.codingapi.txlcn.protocol.message.Message;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static com.codingapi.txlcn.protocol.handler.SessionUtil.getSessionAttribute;
+import static com.codingapi.txlcn.protocol.handler.SessionUtil.setSessionAttribute;
 
 /**
  * @author lorne
@@ -51,20 +53,21 @@ public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message>
     }
 
 
-
-
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         log.debug("Channel active {}", ctx.channel().remoteAddress());
-        final Connection connection = new Connection(ctx.channel(), config);
-        getSessionAttribute(ctx).set(connection);
-        protocoler.handleConnectionOpened(connection);
+        if (getSessionAttribute(ctx) == null) {
+            Channel channel = ctx.channel();
+            final Connection connection = new Connection(ctx.channel(), config);
+            setSessionAttribute(ctx, connection);
+            protocoler.handleConnectionOpened(connection);
+        }
     }
 
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
         log.debug("Channel inactive {}", ctx.channel().remoteAddress());
-        final Connection connection = getSessionAttribute(ctx).get();
+        final Connection connection = getSessionAttribute(ctx);
         protocoler.handleConnectionClosed(connection);
     }
 
@@ -72,7 +75,7 @@ public class ProtocolChannelHandler extends SimpleChannelInboundHandler<Message>
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, final Message message) throws Exception {
         log.debug("Message {} received from {}", message.getClass(), ctx.channel().remoteAddress());
-        final Connection connection = getSessionAttribute(ctx).get();
+        final Connection connection = getSessionAttribute(ctx);
         executors.execute(() -> {
             try {
                 message.handle(applicationContext, protocoler, connection);
